@@ -5,12 +5,27 @@ let router = require("./routers/router");
 
 let port = process.env.PORT || 3000;
 
+const { Socket } = require("socket.io");
+let http = require("http").createServer(app);
+let io = require("socket.io")(http);
+
 app.use(express.static(__dirname + "/"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/api/kitchen", router);
 
-app.listen(port, () => {
+io.on("connection", (socket) => {
+	console.log("user connected");
+	socket.on("disconnect", () => {
+		console.log("user disconnected");
+	});
+
+	setInterval(() => {
+		socket.emit("number", parseInt(Math.random() * 10));
+	}, 1000);
+});
+
+http.listen(port, () => {
 	console.log("server start");
 	//runDB();
 });
